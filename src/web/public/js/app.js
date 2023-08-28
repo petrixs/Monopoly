@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import io from 'socket.io-client';
 import '../css/style.css';
 import properties from '../../../game/types/propertyCards';
 
@@ -150,8 +151,21 @@ class Player {
 const colors = [0xFF0000, 0x00FF00, 0x0000FF];
 const players = colors.map(color => new Player(color));
 
+const socket = io.connect('http://localhost:3000');
+
+socket.on('connect', () => {
+    console.log('Connected to server');
+
+    socket.emit('requestToBackend', { data: 'Hello from frontend!' });
+
+    socket.on('responseFromBackend', (data) => {
+        console.log('Response:', data.message);
+        players[data.playerId].moveTo(data.moveTo);
+    });
+});
+
 // Пример использования:
-players[0].moveTo(30);  // Перемещаем первого игрока на 3 клетки вперед
-players[1].moveTo(12);
-players[2].moveTo(15);
-players[0].moveTo(20);
+// players[0].moveTo(30);  // Перемещаем первого игрока на 3 клетки вперед
+// players[1].moveTo(12);
+// players[2].moveTo(15);
+// players[0].moveTo(20);
