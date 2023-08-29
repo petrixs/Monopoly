@@ -1,3 +1,5 @@
+// noinspection JSValidateTypes
+
 const Monopoly = require('./src/game/game');
 
 const express = require('express');
@@ -8,7 +10,7 @@ const cors = require('cors');
 const game = new Monopoly(["Alice", "Bob"]);
 
 // for (let i = 0; i < 300; i++) {  // 100 ходов для демонстрации
-//     game.playTurn();
+
 // }
 
 //console.log(game.players);
@@ -32,10 +34,21 @@ app.use(cors({
 io.on('connection', (socket) => {
     console.log('Client connected');
 
-    socket.on('requestToBackend', (data) => {
-        console.log('Received:', data);
+    socket.on('request-game', (data) => {
+        console.log('Received request-game:', data);
+        socket.emit('response-game', {
+            message: 'response-game',
+            data: game
+        });
+    });
 
-        socket.emit('responseFromBackend', { message: 'Hello from backend!',playerId:'0', moveTo: 30 });
+    socket.on('request-roll-dice', (data) => {
+        console.log('request-roll-dice:', data);
+        game.playTurn();
+        socket.emit('response-roll-dice', {
+            message: 'response-roll-dice',
+            data: game
+        });
     });
 });
 

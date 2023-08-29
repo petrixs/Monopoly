@@ -148,19 +148,39 @@ class Player {
 
 }
 
+function setGameSettings(params) {
+    const playerStates = params.data.players;
+    for (let i = 0; i < playerStates.length; i++) {
+        const playerState = playerStates[i];
+        players[i].position = playerState._position;
+        players[i].updatePositionGraphics();
+    }
+}
+
 const colors = [0xFF0000, 0x00FF00, 0x0000FF];
 const players = colors.map(color => new Player(color));
+const rollDiceButton = document.getElementById('rollDice');
 
 const socket = io.connect('http://localhost:3000');
 
 socket.on('connect', () => {
     console.log('Connected to server');
+    socket.emit('request-game', { data: 'request-game' });
+    socket.on('response-game', (params) => {
+        console.log('Response response-game:', params.message);
+        setGameSettings(params);
+    });
+});
 
-    socket.emit('requestToBackend', { data: 'Hello from frontend!' });
-
-    socket.on('responseFromBackend', (data) => {
-        console.log('Response:', data.message);
-        players[data.playerId].moveTo(data.moveTo);
+rollDiceButton.addEventListener('click', () => {
+    socket.emit('request-roll-dice');
+    socket.on('response-roll-dice', (params) => {
+        console.log('response-roll-dice:', params.message);
+        const playerStates = params.data.players;
+        for (let i = 0; i < playerStates.length; i++) {
+            const playerState = playerStates[i];
+            players[i].moveTo(playerState._position);
+        }
     });
 });
 
