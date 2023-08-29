@@ -159,30 +159,55 @@ function setGameSettings(params) {
 
 const colors = [0xFF0000, 0x00FF00, 0x0000FF];
 const players = colors.map(color => new Player(color));
-const rollDiceButton = document.getElementById('rollDice');
 
-const socket = io.connect('http://localhost:3000');
+const rollDiceButton = document.getElementById('rollDice');
+const startGameButton = document.getElementById('startGame');
+const names = ["Alice", "Bob"];
+
+let token = sessionStorage.getItem('token');
+
+
+if (!token) {
+    token = names[Math.floor((Math.random()*names.length))];
+    sessionStorage.setItem('token', token);
+} else {
+    console.log("Existing token found: ", token);
+}
+
+console.log(token);
+const socket = io.connect('http://localhost:3000',{
+    query: { token: token }
+});
 
 socket.on('connect', () => {
     console.log('Connected to server');
-    socket.emit('request-game', { data: 'request-game' });
-    socket.on('response-game', (params) => {
-        console.log('Response response-game:', params.message);
+
+    socket.emit('request-reload-game');
+
+    socket.on('response-start-game', (params) => {
+        console.log('response-start-game:', params.data);
         setGameSettings(params);
     });
-});
-
-rollDiceButton.addEventListener('click', () => {
-    socket.emit('request-roll-dice');
     socket.on('response-roll-dice', (params) => {
-        console.log('response-roll-dice:', params.message);
+        console.log('response-roll-dice:', params.data);
         const playerStates = params.data.players;
         for (let i = 0; i < playerStates.length; i++) {
             const playerState = playerStates[i];
             players[i].moveTo(playerState._position);
         }
     });
+
+    rollDiceButton.addEventListener('click', () => {
+        socket.emit('request-roll-dice');
+    });
+
+    startGameButton.addEventListener('click', () => {
+        socket.emit('request-start-game');
+
+    });
 });
+
+
 
 // Пример использования:
 // players[0].moveTo(30);  // Перемещаем первого игрока на 3 клетки вперед

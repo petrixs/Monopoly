@@ -7,7 +7,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 
-const game = new Monopoly(["Alice", "Bob"]);
+//const game = new Monopoly(["Alice", "Bob"]);
 
 // for (let i = 0; i < 300; i++) {  // 100 ходов для демонстрации
 
@@ -17,7 +17,8 @@ const game = new Monopoly(["Alice", "Bob"]);
 
 const app = express();
 const server = http.createServer(app);
-
+let playersToken = [];
+let game;
 const io = socketIo(server, {
     cors: {
         origin: 'http://localhost:8080',
@@ -32,12 +33,30 @@ app.use(cors({
 }));
 
 io.on('connection', (socket) => {
-    console.log('Client connected');
 
-    socket.on('request-game', (data) => {
-        console.log('Received request-game:', data);
-        socket.emit('response-game', {
-            message: 'response-game',
+    const token = socket.handshake.query.token;
+    console.log(`New connection: ${socket.id}`);
+    console.log(`token: ${token}`);
+    playersToken.push(token);
+
+    socket.on('request-reload-game', (data) => {
+        console.log('Received request-reload-game:', data);
+        console.log(playersToken);
+
+       if (!game) return;
+        socket.emit('response-start-game', {
+            message: 'response-start-game',
+            data: game
+        });
+    });
+
+    socket.on('request-start-game', (data) => {
+        console.log('Received request-start-game:', data);
+        console.log(playersToken);
+        game = new Monopoly(playersToken);
+        playersToken = [];
+        io.emit('response-start-game', {
+            message: 'response-start-game',
             data: game
         });
     });
@@ -45,7 +64,7 @@ io.on('connection', (socket) => {
     socket.on('request-roll-dice', (data) => {
         console.log('request-roll-dice:', data);
         game.playTurn();
-        socket.emit('response-roll-dice', {
+        io.emit('response-roll-dice', {
             message: 'response-roll-dice',
             data: game
         });
