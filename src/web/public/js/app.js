@@ -202,19 +202,18 @@ socket.on('connect', () => {
         }
     });
 
-    rollDiceButton.addEventListener('click', () => {
-        socket.emit('request-roll-dice');
-        console.log('request-roll-dice');
-    });
-
-    startGameButton.addEventListener('click', () => {
-        socket.emit('request-start-game');
-        console.log('request-start-game');
-
-    });
 });
 
+rollDiceButton.addEventListener('click', () => {
+    socket.emit('request-roll-dice');
+    console.log('request-roll-dice');
+});
 
+startGameButton.addEventListener('click', () => {
+    socket.emit('request-start-game');
+    console.log('request-start-game');
+
+});
 
 // Пример использования:
 // players[0].moveTo(30);  // Перемещаем первого игрока на 3 клетки вперед
