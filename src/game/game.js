@@ -46,6 +46,16 @@ class Monopoly {
                 }
             }
         } else if(currentProperty.owner && currentProperty.owner !== currentPlayer) {
+            if (currentProperty.type === "property") {
+                const sameStreetProperties = properties.filter(p => p.street === currentProperty.street);
+                const ownedStreetProperties = sameStreetProperties.filter(p => p.owner === currentProperty.owner).length;
+
+                if (ownedStreetProperties === sameStreetProperties.length) {
+                    // Если владелец владеет всеми участками на улице, аренда удваивается
+                    currentProperty.rentAmount *= 2;
+                }
+            }
+
             currentProperty.rent(currentPlayer);
         }
     }
