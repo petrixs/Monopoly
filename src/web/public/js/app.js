@@ -36,6 +36,35 @@ function createCell(x, y, property) {
     text.x = (CELL_SIZE - text.width) / 2;  // центрирование по горизонтали
     text.y = (CELL_SIZE - text.height) / 2; // центрирование по вертикали
 
+    if(property.street) {
+        const streetPlaque = new PIXI.Graphics();
+        const streetColor = property.street;
+        streetPlaque.beginFill(streetColor);
+
+        const plaqueOffset = 10; // Отступ плашки от клетки
+
+        if (x == 0) { // Левые клетки
+            streetPlaque.drawRect(CELL_SIZE, 0, 8, CELL_SIZE);
+            streetPlaque.x = x;  // Плашка будет справа от ячейки
+            streetPlaque.y = y;
+        } else if (x == (BOARD_SIZE - 1) * CELL_SIZE) { // Правые клетки
+            streetPlaque.drawRect(-8, 0, 8, CELL_SIZE);
+            streetPlaque.x = x;  // Плашка будет слева от ячейки
+            streetPlaque.y = y;
+        } else if (y == 0) { // Верхние клетки
+            streetPlaque.drawRect(0, CELL_SIZE, CELL_SIZE, 8);
+            streetPlaque.x = x;
+            streetPlaque.y = y; // Плашка будет снизу от ячейки
+        } else if (y == (BOARD_SIZE - 1) * CELL_SIZE) { // Нижние клетки
+            streetPlaque.drawRect(0, -8, CELL_SIZE, 8);
+            streetPlaque.x = x;
+            streetPlaque.y = y;  // Плашка будет сверху от ячейки
+        }
+
+        streetPlaque.endFill();
+        app.stage.addChild(streetPlaque);
+    }
+
     cell.addChild(text);
     app.stage.addChild(cell);
 }
